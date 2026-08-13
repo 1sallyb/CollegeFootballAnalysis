@@ -1,0 +1,42 @@
+---
+title: "setup"
+author: "SallyB"
+date: "2025-10-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+Sys.getenv("CFBD_API_KEY")
+```
+
+```{r library-setup, message=FALSE, warning=FALSE}
+library(cfbfastR)
+library(tidyverse)
+```
+
+### Download game results (2024)
+*This pulls every FBS game - home team, away team, points, site, etc.*
+```{r}
+games_raw <- map_dfr(2024, ~ cfbd_game_info(year = .x))
+```
+
+### Clean up the key columns
+```{r}
+games <- games_raw %>%
+  filter(!is.na(home_points), !is.na(away_points)) %>%
+  mutate(
+    home_win = ifelse(home_points > away_points, 1, 0),
+    point_diff = home_points - away_points
+  )
+```
+
+### Save for offline use
+```{r}
+if(!dir.exists("data")) dir.create("data")
+write_csv(games, "data/games_2024.csv")
+```
+
+```{r}
+glimpse(games)
+summary(games$home_win)
+```

@@ -1,0 +1,163 @@
+---
+title: "Analysis and Results"
+author: "SallyB"
+date: "2025-12-06"
+output: html_document
+---
+```{r setup}
+library(dplyr)
+library(ggplot2)
+```
+## Analysis
+### relevant plots and summary statistics for important variables
+
+#### Quantitative Variables
+##### Point Differential
+
+```{r}
+hist(sec_2024$point_diff)
+plot(sec_2024$point_diff)
+```
+
+##### Home Points
+
+```{r}
+hist(sec_2024$home_points)
+plot(sec_2024$home_points)
+```
+
+##### Away Points
+
+```{r}
+hist(sec_2024$away_points)
+plot(sec_2024$away_points)
+```
+
+##### Home Win
+```{r}
+table(sec_2024$home_win)
+# Summarize number of home wins per team
+home_wins_by_team <- sec_2024 %>% # take the dataset and pipe into home_wins_by_team
+  filter(home_win == 1) %>% # keep only where home teams won
+  group_by(home_team) %>% # group data by home team
+  summarise(home_wins = n()) %>% # count the number of rows where wins and add to home_wins
+  arrange(desc(home_wins))  # sort team from most wins to least wins
+
+# Plot
+ggplot(home_wins_by_team, aes(x = reorder(home_team, -home_wins) # teams on x-axis and reorders them by descending wins
+                              , y = home_wins, fill = home_wins)) + # number of wins, fill colors the bar depending on the height level
+  geom_col() + # draws the bar
+  geom_text(aes(label = home_wins), vjust = -0.5) + # add the number of wins just slightly above the bar
+  scale_fill_gradient(low = "limegreen", high = "darkgreen") + # gradient fill for clarity
+  labs( 
+    title = "Number of Home Wins per SEC Team (2024)",
+    x = "Home Team",
+    y = "Number of Wins"
+  ) +
+  theme_minimal() + # add clean theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # rotates the x-axis labels to 45 degrees
+```
+
+```{r}
+sec_2024 %>%
+  summarise(home_win_rate = mean(home_win)) %>%
+  ggplot(aes(x = "", y = home_win_rate)) +
+  geom_col(fill = "steelblue") +
+  geom_text(aes(label = scales::percent(home_win_rate, accuracy = 1)),
+            vjust = -0.5, size = 5) +
+  labs(title = "SEC Home Win Percentage (2024)",
+       x = "",
+       y = "Win Percentage") +
+  ylim(0, 1) +
+  theme_minimal()
+```
+
+```{r}
+teams <- unique(sec_2024$home_team)
+
+for (tm in teams) {
+  cat("\n===== Team:", tm, "=====\n")
+  
+  df_team <- subset(sec_2024, home_team == tm)
+  
+  cat("Games:", nrow(df_team), "\n")
+  cat("Home win rate:", mean(df_team$home_win), "\n")
+  cat("Mean point diff:", mean(df_team$point_diff), "\n")
+}
+```
+
+```{r}
+ggplot(sec_2024, aes(x = reorder(home_team, point_diff, FUN = median), y = point_diff)) +
+  geom_boxplot(fill = "forestgreen", alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "SEC Home-Field Advantage by Team (Point Differential)",
+    x = "Home Team",
+    y = "Point Differential (Home - Away)"
+  ) +
+  coord_flip() +   # flip to make team names readable
+  theme_minimal(base_size = 12)
+```
+
+
+
+## Results
+
+### Did SEC home teams have a significantly higher win percentage in 2024?
+H₀: p = 0.50 (home field gives no advantage)
+H₁: p > 0.50 (home field advantage exists)
+```{r}
+home_wins <- sum(sec_2024$home_win)
+total_games <- nrow(sec_2024)
+
+prop.test(
+  x = home_wins,
+  n = total_games,
+  p = 0.5,
+  alternative = "greater",
+  correct = FALSE
+)
+```
+
+SEC home teams won 60.4% of their games in 2024.
+A one-sample proportion test was used to determine whether this was significantly greater than 50%.
+The result was not statistically significant at the 0.05 level (p = 0.065), and the 95% confidence interval (0.491–1.000) includes 0.50.
+Therefore, we cannot conclude that SEC home teams had a significantly higher win percentage, although the effect is close to marginal significance.
+
+
+### Was the average point differential greater than zero?
+	H₀: mean point differential = 0
+	H₁: mean point differential > 0 (SEC teams score more points than opponents)
+```{r}
+t.test(sec_2024$point_diff,
+       mu = 0,
+       alternative = "greater")
+```
+	•	Mean point differential: 2.06
+→ On average, SEC teams won by ~2 points.
+	•	t = 0.862, df = 52
+	•	p-value = 0.1963
+	
+The average point differential for SEC teams in 2024 was +2.06 points.
+A one-sample t-test was used to test whether the mean differential was significantly greater than zero.
+The test did not reach statistical significance (t = 0.86, p = 0.196), and the 95% one-sided confidence interval (−1.94, ∞) includes zero.
+Therefore, we cannot conclude that SEC teams outscored their opponents by a meaningful or statistically significant amount on average.
+
+
+### How did home-field advantage vary between teams within the SEC?
+```{r}
+anova_result <- aov(point_diff ~ home_team, data = sec_2024)
+summary(anova_result)
+```
+A one-way ANOVA tested whether home-field advantage differed across SEC teams in 2024.
+The effect of home_team was statistically significant (F = 2.06, p = 0.039), indicating that home-field advantage was not uniform across the conference.
+Some SEC teams exhibited a stronger home-field advantage than others, while some showed little or none.
+Post-hoc comparisons (e.g., Tukey HSD) can be used to identify which teams differed significantly.
+
+```{r}
+TukeyHSD(anova_result)
+```
+A Tukey HSD post-hoc test was conducted to identify which SEC teams differed in home-field advantage.
+Although the ANOVA indicated significant overall differences among teams (p = 0.039),
+the Tukey test revealed no statistically significant pairwise differences between any individual teams (all adjusted p-values > 0.05).
+This suggests that team-level variance exists collectively, but no single team stood out as having a significantly greater or lesser home-field advantage after accounting for multiple comparisons.
