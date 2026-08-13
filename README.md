@@ -66,12 +66,12 @@ Average point differential varied across SEC teams, with the overall ANOVA indic
 
 ## Project Structure
 ```text
-CollegeFootballAnalysis/
+CollegeFootballAnalysis/CollegeFootball
 ├── README.md
 ├── data/
 │   ├── games_2024.csv
 │   └── sec_2024_clean.csv
-├── analysis/
+├── code/
 │   ├── final.qmd
 │   ├── results.qmd
 │   ├── sec_setup.Rmd
