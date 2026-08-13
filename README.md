@@ -65,22 +65,21 @@ Average point differential varied across SEC teams, with the overall ANOVA indic
   * RStudio
 
 ## Project Structure
+```text
 CollegeFootballAnalysis/
-|
-|-- README.md
-|-- data/
-|   |-- games_2024.csv
-|   |-- sec_2024_clean.csv
-|-- code/
-|   |-- final.qmd
-|   |-- results.qmd
-|   |-- sec_setup.Rmd
-|   |-- setup.Rmd
-|-- images/
-|   |-- home_win_rate.png
-|   |-- point_differential.png
-|   |-- team_home_advantage.png
-
+├── README.md
+├── data/
+│   ├── games_2024.csv
+│   └── sec_2024_clean.csv
+├── analysis/
+│   ├── final.qmd
+│   ├── results.qmd
+│   ├── sec_setup.Rmd
+│   └── setup.Rmd
+└── images/
+    ├── home_win_rate.png
+    ├── point_differential.png
+    └── team_home_advantage.png
 
 ## Future Improvements
 Potential improvements to this analysis include:
