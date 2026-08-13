@@ -1,0 +1,70 @@
+---
+title: "sec_setup"
+author: "SallyB"
+date: "2025-11-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+games_2024 <- read.csv("data/games_2024.csv")
+```
+
+```{r}
+# maintain SEC list
+sec_teams <- c(
+  "Alabama", "Arkansas", "Auburn", "Florida", "Georgia",
+  "Kentucky", "LSU", "Mississippi State", "Missouri",
+  "Ole Miss", "South Carolina", "Tennessee", "Texas A&M",
+  "Oklahoma", "Texas"
+)
+```
+
+```{r}
+# create SEC only dataset
+sec_2024 <- games_2024 %>%
+  filter(
+    home_team %in% sec_teams & away_team %in% sec_teams
+  )
+```
+
+
+```{r}
+# remove neutral site games
+sec_2024 <- sec_2024 %>%
+  filter(neutral_site == FALSE)
+```
+
+```{r}
+# add variables for later
+sec_2024 <- sec_2024 %>%
+  mutate(
+    home_win = ifelse(home_points > away_points, 1, 0),
+    point_diff = home_points - away_points
+  )
+```
+
+
+```{r}
+write_csv(sec_2024, "data/sec_2024_clean.csv")
+
+#table(sec_2024$neutral_site)
+#unique(sec_2024$home_team)
+nrow(sec_2024)
+```
+
+
+```{r}
+str(sec_2024)
+```
+
+
+
+
+
+
