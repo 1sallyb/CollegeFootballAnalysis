@@ -80,7 +80,7 @@ CollegeFootballAnalysis/
     ├── home_win_rate.png
     ├── point_differential.png
     └── team_home_advantage.png
-
+```
 ## Future Improvements
 Potential improvements to this analysis include:
   * Expanding the analysis to multiple SEC seasons
